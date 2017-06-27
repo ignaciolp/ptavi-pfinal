@@ -23,14 +23,14 @@ class XMLHandler(ContentHandler):
     def __init__(self):
 
         self.int_dic = {'server': ['name', 'ip', 'port'],
-                           'database': ['path', 'passwdpath'],
-                           'log': ['path']}
+                        'database': ['path', 'passwdpath'],
+                        'log': ['path']}
         self.init_list = []
 
     def startElement(self, name, attrs):
-        dicc_stE ={}
+        dicc_stE = {}
         if name in self.int_dic:
-            dicc_stE = {'Tag':name}
+            dicc_stE = {'Tag': name}
             for atribute in self.int_dic[name]:
                 dicc_stE[atribute] = attrs.get(atribute, '')
             self.init_list.append(dicc_stE)
@@ -51,6 +51,7 @@ data_path = init_list[1]['path']
 contraseña_path = init_list[1]['passwdpath']
 log_file = init_list[2]['path']
 
+
 def Log(log_file, tiempo, evento):
     fichero = open(log_file, 'a')
     tiempo = time.gmtime(time.time())
@@ -65,14 +66,14 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     dicc_client = {}  # Diccionario de clientes registrados
-    nonce = [] #lista de numero aleatorio
+    nonce = []  # lista de numero aleatorio
 
     def register2json(self):
-        
+
         json.dump(self.dicc_client, open('registered.json', 'w'))
 
     def json2registered(self):
-        
+
         try:
             with open('registered.json') as client_file:
                 self.dicc_client = json.load(client_file)
@@ -81,9 +82,9 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
             self.file_exists = False
 
     def delete(self):
-        
+
         deletList = []
-        
+
         for client in self.dicc_client:
             self.expire = int(self.dicc_client[client][-1])
             now = time.time()
@@ -95,7 +96,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
         self.register2json()
 
     def handle(self):
-        
+
         self.json2registered()
         while 1:
             line = self.rfile.read().decode('utf-8')
@@ -105,9 +106,9 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
             line_selec = line.split()
             metodo = line_selec[0]
 
-            evento = ' Received from ' + self.client_address[0] 
-            evento += ':' + str(self.client_address[1]) + ': ' 
-            evento +=  line
+            evento = ' Received from ' + self.client_address[0]
+            evento += ':' + str(self.client_address[1]) + ': '
+            evento += line
             tiempo = time.gmtime(time.time())
             Log(log_file, tiempo, evento)
 
@@ -121,7 +122,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     self.wfile.write(bytes(answer, 'utf-8'))
 
                     evento = ' Sent to ' + self.client_address[0] + ':'
-                    evento += str(self.client_address[1]) + ': ' 
+                    evento += str(self.client_address[1]) + ': '
                     evento += answer
                     tiempo = time.gmtime(time.time())
                     Log(log_file, tiempo, evento)
@@ -158,7 +159,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.cliente_lista = []
                         self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
 
-                        evento = ' Sent to ' + self.client_address[0] 
+                        evento = ' Sent to ' + self.client_address[0]
                         evento += ':' + str(self.port) + ': '
                         evento += 'SIP/2.0 200 OK\r\n\r\n'
                         tiempo = time.gmtime(time.time())
@@ -174,7 +175,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 if user in self.dicc_client.keys():
                     self.json2registered()
                     IP_server = self.dicc_client[user][0]  # IP destino
-                    PORT_server = self.dicc_client[user][1]  # Puerto destino                   
+                    PORT_server = self.dicc_client[user][1]  # Puerto destino
                     my_socket = socket.socket(socket.AF_INET,
                                               socket.SOCK_DGRAM)
                     my_socket.setsockopt(socket.SOL_SOCKET,
@@ -190,7 +191,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     data = my_socket.recv(int(server_port))
                     datos_recibidos = data.decode('utf-8')
 
-                    evento = ' Received from ' + IP_server 
+                    evento = ' Received from ' + IP_server
                     evento += ':' + PORT_server + ': ' + datos_recibidos
                     tiempo = time.gmtime(time.time())
                     Log(log_file, tiempo, evento)
@@ -236,13 +237,13 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 print('Recibido -- ', data.decode('utf-8'))
                 self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
 
-                evento = ' Sent to ' + self.client_address[0] + ':' 
+                evento = ' Sent to ' + self.client_address[0] + ':'
                 evento += str(self.client_address[1]) + ': ' + line
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
 
             elif metodo == 'BYE':
-    
+
                 self.json2registered()
                 usuario = line.split()[1].split(':')[1]  # Al que mando el BYE
                 IP_server = self.dicc_client[usuario][0]  # IP destino
@@ -271,7 +272,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(bytes(datos_recibidos, 'utf-8'))
 
                 evento = ' Sent to ' + self.client_address[0] + ':'
-                evento += str(self.client_address[1]) + ': ' 
+                evento += str(self.client_address[1]) + ': '
                 evento += datos_recibidos
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
@@ -281,7 +282,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 answer = 'SIP/2.0 405 Method Not Allowed\r\n\r\n'
                 self.wfile.write(bytes(answer, 'utf-8'))
 
-                evento = ' Sent to ' + self.client_address[0] + ':' 
+                evento = ' Sent to ' + self.client_address[0] + ':'
                 evento += str(self.client_address[1]) + ': ' + answer
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
@@ -291,7 +292,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 answer = 'SIP/2.0 400 Bad Request\r\n\r\n'
                 self.wfile.write(bytes(answer, 'utf-8'))
 
-                evento = ' Sent to ' + self.client_address[0] + ':' 
+                evento = ' Sent to ' + self.client_address[0] + ':'
                 evento += str(self.client_address[1]) + ': ' + answer
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
@@ -301,7 +302,8 @@ evento = ' Starting...'
 tiempo = time.gmtime(time.time())
 Log(log_file, tiempo, evento)
 try:
-    serv = socketserver.UDPServer((server_ip, int(server_port)), RegisterHandler)
+    serv = socketserver.UDPServer((server_ip,
+                                   int(server_port)), RegisterHandler)
     print('Server BigBangServer listening at port ' + server_port + '...')
     serv.serve_forever()
 except KeyboardInterrupt:
