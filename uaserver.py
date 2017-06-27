@@ -18,25 +18,26 @@ except IndexError:
 class XMLHandler(ContentHandler):
 
     def __init__(self):
-        
+
         self.int_dic = {'account': ['username', 'passwd'],
-                           'uaserver': ['ip', 'puerto'],
-                           'rtpaudio': ['puerto'],
-                           'regproxy': ['ip', 'puerto'],
-                           'log': ['path'],
-                           'audio': ['path']}
+                        'uaserver': ['ip', 'puerto'],
+                        'rtpaudio': ['puerto'],
+                        'regproxy': ['ip', 'puerto'],
+                        'log': ['path'],
+                        'audio': ['path']}
         self.init_list = []
 
     def startElement(self, name, attrs):
-        dicc_stE ={}
+        dicc_stE = {}
         if name in self.int_dic:
-            dicc_stE = {'etiqueta':name}
+            dicc_stE = {'etiqueta': name}
             for atribute in self.int_dic[name]:
                 dicc_stE[atribute] = attrs.get(atribute, "")
             self.init_list.append(dicc_stE)
 
     def get_data(self):
         return self.init_list
+
 
 def Log(log_file, tiempo, evento):
     fichero = open(log_file, 'a')
@@ -79,8 +80,8 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             if not line:
                 break
             metodo = line_selec[0]
-            
-            evento = ' Received from ' + proxy_IP + ':' 
+
+            evento = ' Received from ' + proxy_IP + ':'
             evento += proxy_port + ': ' + line
             tiempo = time.gmtime(time.time())
             Log(log_file, tiempo, evento)
@@ -93,9 +94,9 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 petition += "Content-Type: application/sdp \r\n"
                 petition += "v=0 \r\n" + "o=" + usuario_nombre + " "
                 petition += server_ip + "\r\n" + "s=misesion \r\n" + "t=0 \r\n"
-                petition += "m=audio " +rtpaudio_port + " RTP \r\n\r\n"
+                petition += "m=audio " + rtpaudio_port + " RTP \r\n\r\n"
 
-                evento = ' Sent to ' + proxy_IP + ':' 
+                evento = ' Sent to ' + proxy_IP + ':'
                 evento += proxy_port + ': ' + petition
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
@@ -110,22 +111,22 @@ class EchoHandler(socketserver.DatagramRequestHandler):
 
             elif metodo == 'ACK':
                 print('me esta llegando ', line)
-               
+
                 aEjecutar = './mp32rtp -i ' + self.rtproxy_list[1] + ' -p '
                 aEjecutar += self.rtproxy_list[2] + ' < ' + audio_file
 
-                evento = ' Sending to ' + self.rtproxy_list[1] + ':' 
+                evento = ' Sending to ' + self.rtproxy_list[1] + ':'
                 evento += self.rtproxy_list[2] + ': ' + 'audio_file'
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
-               
+
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
                 print('Finished transfer')
 
                 evento = ' Finished audio transfer to ' + " "
-                evento +=  self.rtproxy_list[1] + ':' + self.rtproxy_list[2] + ": "  
-                evento +=  'audio_file'
+                evento += self.rtproxy_list[1] + ':' + self.rtproxy_list[2]
+                evento += ": " 'audio_file'
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
 
@@ -134,29 +135,29 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 petition = 'SIP/2.0 200 OK\r\n\r\n'
                 self.wfile.write(bytes(petition, 'utf-8'))
 
-                evento = ' Sent to ' + proxy_IP + ':' 
+                evento = ' Sent to ' + proxy_IP + ':'
                 evento = proxy_port + ': ' + petition
                 tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
 
             elif metodo != 'INVITE' or metodo != 'BYE' or metodo != 'ACK':
-               
+
                 petition = 'SIP/2.0 405 Method Not Allowed\r\n\r\n'
                 self.wfile.write(byes(petition, 'utf-8'))
 
-                evento = ' Sent to ' + proxy_IP + ':' 
+                evento = ' Sent to ' + proxy_IP + ':'
                 evento = proxy_port + ': ' + petition
                 tiempo = time.gmtime(time.time())
                 mLog(log_file, tiempo, evento)
 
             else:
-               
+
                 petition = 'SIP/2.0 400 Bad Request'
                 self.wfile.write(bytes(petition, 'utf-8'))
 
-                evento = ' Sent to ' + proxy_IP + ':' 
-                evento = proxy_port + ': ' + petition 
-                tiempo = time.gmtime(time.time())         
+                evento = ' Sent to ' + proxy_IP + ':'
+                evento = proxy_port + ': ' + petition
+                tiempo = time.gmtime(time.time())
                 Log(log_file, tiempo, evento)
 
 # Creamos servidor y escuchamos
@@ -174,5 +175,3 @@ except KeyboardInterrupt:
     tiempo = time.gmtime(time.time())
     Log(log_file, tiempo, evento)
     sys.exit('\r\nFinished uaserver')
-
-
