@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<config>
+  <server name="BigBangServer" ip="127.0.0.1" port="5555"/>
+  <database path="registered.json" passwdpath="passwords"/>
+  <log path="logpr.txt"/>
+</config>
